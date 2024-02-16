@@ -13,7 +13,7 @@ export default function MealContent({ color, type }) {
 
   return (
     <>
-    <AddItem content="Add Food item"/>
+    <AddItem type = {type} content="Add Food item"/>
     </>
   );
 };

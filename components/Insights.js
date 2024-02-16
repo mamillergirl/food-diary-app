@@ -2,12 +2,13 @@ import React, { useState, useEffect } from 'react';
 import { SafeAreaView, Dimensions } from 'react-native';
 import { LineChart } from 'react-native-chart-kit';
 import { firebase } from '../firebase';
+import ChartComponent from './ChartComponent';
 
 export default function Insights() {
   const [graphData, setGraphData] = useState([]);
 
   useEffect(() => {
-    const todoRef = firebase.firestore().collection('testData');
+    const todoRef = firebase.firestore().collection('symptoms');
 
     const unsubscribe = todoRef.onSnapshot((querySnapshot) => {
       querySnapshot.forEach((doc) => {
@@ -23,7 +24,7 @@ export default function Insights() {
 
   return (
     <SafeAreaView>
-      <LineChart
+      {/* <LineChart
         data={{
           labels: graphData.map((_, index) => index.toString()), // Using indices as labels
           datasets: [
@@ -55,7 +56,8 @@ export default function Insights() {
           marginVertical: 8,
           borderRadius: 16,
         }}
-      />
+      /> */}
+      <ChartComponent/>
     </SafeAreaView>
   );
 }

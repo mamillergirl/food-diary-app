@@ -21,7 +21,7 @@ const Card = ({ color, type, category}) => {
 
        <Text style={styles.arrow}>{isOpen ? 'V' : '>'}</Text> 
     </TouchableOpacity>
-    {isOpen? <MealContent color="red" type="input" category="input"/>: <></>}
+    {isOpen? <MealContent color="red" type="breakfast"/>: <></>}
     </>
   );
 };

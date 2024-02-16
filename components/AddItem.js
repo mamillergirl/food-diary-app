@@ -3,7 +3,7 @@ import { View, TouchableOpacity, Text, StyleSheet } from 'react-native';
 import FoodSearchScreen from './FoodSearchScreen';
 
 
-const AddItem = ({ content }) => {
+const AddItem = ({ content, type }) => {
   const [isSearching, setIsSearching] = useState(false); // State to track whether the searching component is open
 
   // Function to toggle the searching component
@@ -22,7 +22,7 @@ const AddItem = ({ content }) => {
       </TouchableOpacity>
      
     </View>
-     {isSearching && <FoodSearchScreen/>} 
+     {isSearching && <FoodSearchScreen meal = {type}/>} 
      </>
   );
 };
