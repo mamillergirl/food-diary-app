@@ -1,8 +1,12 @@
+import React from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { Ionicons } from '@expo/vector-icons';
+
 import FoodSearchScreen from './components/FoodSearchScreen';
-import Home from './components/Home';
+import HomeNav from './components/homeNav';
+
+import SymptomSelector from './components/SymptomSelector';
 import Insights from './components/Insights';
 
 const Tab = createBottomTabNavigator();
@@ -16,17 +20,18 @@ const App = () => {
         }}>
         <Tab.Screen
           name="Home"
-          component={Home}
+          component={HomeNav}
           options={{
             tabBarIcon: ({ color, size }) => (
               <Ionicons name="ios-home" color={color} size={size} />
             ),
             headerShown: false,
           }}
-        />
+          independent={true} 
+          />        
         <Tab.Screen
-          name="FoodSearch"
-          component={FoodSearchScreen}
+          name="SymptomSelector"
+          component={SymptomSelector}
           options={{
             tabBarIcon: ({ color, size }) => (
               <Ionicons name="search-outline" color={color} size={size} />

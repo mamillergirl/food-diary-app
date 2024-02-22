@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
 import { View, TouchableOpacity, Text, StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import MealContent from './MealContent';
 
-const Card = ({ color, type, category}) => {
+import AddItem from './AddItem';
+
+const Card = ({ color, type, category }) => {
   const [isOpen, setIsOpen] = useState(false); // State to track whether the component is open
 
   // Function to toggle the component
@@ -21,7 +22,7 @@ const Card = ({ color, type, category}) => {
 
        <Text style={styles.arrow}>{isOpen ? 'V' : '>'}</Text> 
     </TouchableOpacity>
-    {isOpen? <MealContent color="red" type="breakfast"/>: <></>}
+    {isOpen? <AddItem content="Add Food"  type="breakfast"/>: <></>}
     </>
   );
 };

@@ -5,11 +5,7 @@ import AddItem from './AddItem'
 
 export default function MealContent({ color, type }) {
   const [isOpen, setIsOpen] = useState(false); // State to track whether the component is open
-
-  // Function to toggle the component
-  const toggleComponent = () => {
-    setIsOpen(!isOpen);
-  };
+  
 
   return (
     <>

@@ -9,12 +9,16 @@
     "web": "expo start --web"
   },
   "dependencies": {
+    "@eva-design/eva": "^2.2.0",
     "@react-native-firebase/firestore": "^18.8.0",
     "@react-navigation/bottom-tabs": "^6.5.11",
     "@react-navigation/native": "^6.1.9",
+    "@react-navigation/native-stack": "^6.9.18",
+    "@ui-kitten/components": "^5.3.1",
     "axios": "^1.6.5",
     "expo": "~49.0.15",
     "firebase": "^10.7.1",
+    "lodash": "^4.17.21",
     "react": "18.2.0",
     "react-native": "0.72.6",
     "react-native-chart-kit": "^6.12.0",

@@ -1,65 +1,60 @@
-import React, { useState } from 'react';
-import { View, TouchableOpacity, Text, StyleSheet } from 'react-native';
-import FoodSearchScreen from './FoodSearchScreen';
+import React, { useState } from "react";
+import { View, TouchableOpacity, Text, StyleSheet } from "react-native";
+import { useNavigation } from '@react-navigation/native';
+
+const AddItem = ({ content, type}) => {
+
+  const navigation = useNavigation();
 
 
-const AddItem = ({ content, type }) => {
-  const [isSearching, setIsSearching] = useState(false); // State to track whether the searching component is open
-
-  // Function to toggle the searching component
-  const toggleSearching = () => {
-    setIsSearching(!isSearching);
-  };
 
   return (
     <>
-    <View style={[styles.outsideContainer]} >
-      <TouchableOpacity style={[styles.container]} onPress={toggleSearching}>
-        <View style={styles.subcontainer}>
-          <Text style={[styles.heading]}>{content}</Text>
-        </View>
-        <Text style={[styles.heading]}>+</Text>
-      </TouchableOpacity>
-     
-    </View>
-     {isSearching && <FoodSearchScreen meal = {type}/>} 
-     </>
+      <View style={[styles.outsideContainer]}>
+        <TouchableOpacity style={[styles.container]} onPress={() => navigation.navigate('FoodSearchScreen', {type})}>
+          <View style={styles.subcontainer}>
+            <Text style={[styles.heading]}>{content}</Text>
+          </View>
+          <Text style={[styles.heading]}>+</Text>
+        </TouchableOpacity>
+      </View>
+    </>
   );
 };
 
 const styles = StyleSheet.create({
   outsideContainer: {
-    width: '90%',
+    width: "90%",
     height: 70,
-    backgroundColor: 'white',
+    backgroundColor: "white",
     borderRadius: 20,
-    overflow: 'hidden',
-    marginBottom: '5%'
+    overflow: "hidden",
+    marginBottom: "5%",
   },
   container: {
-    flexDirection: 'row',
-    width: '100%',
+    flexDirection: "row",
+    width: "100%",
     height: 70,
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    backgroundColor: 'white',
+    alignItems: "center",
+    justifyContent: "space-between",
+    backgroundColor: "white",
     borderRadius: 20,
-    overflow: 'hidden'
+    overflow: "hidden",
   },
   subcontainer: {
-    flexDirection: 'row',
+    flexDirection: "row",
     height: 100,
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    backgroundColor: 'white',
+    alignItems: "center",
+    justifyContent: "space-between",
+    backgroundColor: "white",
     borderRadius: 20,
-    overflow: 'hidden',
+    overflow: "hidden",
   },
   heading: {
     fontSize: 16,
-    fontWeight: 'bold',
-    padding: '5%',
-    color: '#808080',
+    fontWeight: "bold",
+    padding: "5%",
+    color: "#808080",
   },
 });
 
