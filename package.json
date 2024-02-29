@@ -10,6 +10,8 @@
   },
   "dependencies": {
     "@eva-design/eva": "^2.2.0",
+    "@expo-google-fonts/inter": "^0.2.3",
+    "@react-native-community/cli": "^12.3.6",
     "@react-native-firebase/firestore": "^18.8.0",
     "@react-navigation/bottom-tabs": "^6.5.11",
     "@react-navigation/native": "^6.1.9",
@@ -22,12 +24,14 @@
     "react": "18.2.0",
     "react-native": "0.72.6",
     "react-native-chart-kit": "^6.12.0",
+    "react-native-dotenv": "^3.4.11",
     "react-native-elements": "^3.4.3",
     "react-native-paper": "^5.12.1",
     "react-navigation": "^5.0.0"
   },
   "devDependencies": {
-    "@babel/core": "^7.20.0"
+    "@babel/core": "^7.20.0",
+    "dotenv": "^16.4.5"
   },
   "private": true
 }

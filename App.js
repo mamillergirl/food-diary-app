@@ -29,16 +29,7 @@ const App = () => {
           }}
           independent={true} 
           />        
-        <Tab.Screen
-          name="SymptomSelector"
-          component={SymptomSelector}
-          options={{
-            tabBarIcon: ({ color, size }) => (
-              <Ionicons name="search-outline" color={color} size={size} />
-            ),
-            headerShown: false,
-          }}
-        />
+      
         <Tab.Screen
           name="Insights"
           component={Insights}

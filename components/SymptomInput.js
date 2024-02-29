@@ -1,12 +1,44 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet } from 'react-native';
-import Card from './Card';
+import { db } from "../firebase";
+import { getDoc, doc } from "firebase/firestore";
+
+import SymptomCard from './SymptomCard';
+import AddSymptom from './AddSymptom';
 
 const SymptomInput = ({ headingText, color }) => {
+  const [symptoms, setSymptoms] = useState([]);
+
+  useEffect(() => {
+    const fetchSymptoms = async () => {
+      try {
+        const docRef = doc(db, "user", "Xt9jJu2sHvNk6oSpbrMd");
+        const docSnapshot = await getDoc(docRef);
+        if (docSnapshot.exists()) {
+          const data = docSnapshot.data();
+          if (data.trackSymptoms) {
+            setSymptoms(data.trackSymptoms);
+          }
+        }
+       
+      } catch (error) {
+        console.error("Error fetching symptoms: ", error);
+      }
+    };
+    fetchSymptoms();
+  }, []);
+
   return (
     <View style={styles.container}>
-      <Card color='#FF655B' type="Diarrhea" category="Symptom" />
-      <Card color='#FF655B' type="Bloating" category="Symptom" />
+      {symptoms.map((symptom, index) => (
+        <SymptomCard
+          key={index}
+          color='#FF655B'
+          type={symptom}
+        />
+      ))}
+ 
+      <AddSymptom />
     </View>
   );
 };

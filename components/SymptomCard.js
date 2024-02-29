@@ -1,34 +1,26 @@
 import React, { useState } from 'react';
 import { View, TouchableOpacity, Text, StyleSheet } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
-import { useFonts, Inter_400Regular } from '@expo-google-fonts/inter';
+
 
 
 import AddItem from './AddItem';
 
-const Card = ({ color, type, category }) => {
-  const [isOpen, setIsOpen] = useState(false); // State to track whether the component is open
+const SymptomCard = ({ color, type}) => {
 
-  // Function to toggle the component
-  const toggleComponent = () => {
-    setIsOpen(!isOpen);
-  };
+
+
 
   return (
     <>
-    <TouchableOpacity style={[styles.container]} onPress={toggleComponent}>
+    <TouchableOpacity style={[styles.container]}>
       <View style={styles.subcontainer}>
         <View style={[styles.side, { backgroundColor: color }]}></View>
         <Text style={[styles.heading, { color: color }]}>{type}</Text>
       </View>
 
-      <Ionicons
-                  name={isOpen ? 'chevron-up' : 'chevron-down'} // Change the icon based on selection
-                  size={24}
-                  color="black"
-                />
+  
     </TouchableOpacity>
-    {isOpen? <AddItem content="Add Food"  type="breakfast"/>: <></>}
+
     </>
   );
 };
@@ -70,4 +62,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default Card;
+export default SymptomCard;

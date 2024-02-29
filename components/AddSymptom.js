@@ -2,18 +2,16 @@ import React, { useState } from "react";
 import { View, TouchableOpacity, Text, StyleSheet } from "react-native";
 import { useNavigation } from '@react-navigation/native';
 
-const AddItem = ({ content, type}) => {
+const AddSymptom = () => {
 
   const navigation = useNavigation();
-
-
 
   return (
     <>
       <View style={[styles.outsideContainer]}>
-        <TouchableOpacity style={[styles.container]} onPress={() => navigation.navigate('FoodSearchScreen', {meal: type})} >
+        <TouchableOpacity style={[styles.container]} onPress={() => navigation.navigate('SymptomSelector')} >
           <View style={styles.subcontainer}> 
-            <Text style={[styles.heading]}>{content}</Text>
+            <Text style={[styles.heading]}>Add Symptom to Track</Text>
           </View>
           <Text style={[styles.heading]}>+</Text>
         </TouchableOpacity>
@@ -24,7 +22,7 @@ const AddItem = ({ content, type}) => {
 
 const styles = StyleSheet.create({
   outsideContainer: {
-    width: "90%",
+    width: "100%",
     height: 70,
     backgroundColor: "white",
     borderRadius: 20,
@@ -58,4 +56,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default AddItem;
+export default AddSymptom;
