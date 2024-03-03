@@ -76,7 +76,7 @@ const SymptomSelector = () => {
           keyExtractor={(item) => item.id}
           renderItem={({ item }) => (
             <View>
-              <TouchableOpacity
+              <TouchableOpacity 
                 style={[
                   styles.symptomItem,
                 ]}
@@ -94,7 +94,7 @@ const SymptomSelector = () => {
                   data={symptomList}
                   keyExtractor={(item) => item.id}
                   renderItem={({ item }) => (
-                    <TouchableOpacity
+                    <TouchableOpacity 
                       style={[
                         styles.symptomItem,
                         styles.subItem,
@@ -141,7 +141,7 @@ const styles = {
   symptom: {
     fontSize: 18,
     fontWeight: "bold",
-    color: "blue",
+    color: "#FF655B",
     marginBottom: 5,
     padding: 10,
   },

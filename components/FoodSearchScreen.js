@@ -8,26 +8,65 @@ import {
   StyleSheet,
   Image,
   ScrollView,
+  Modal,
+  Button,
+  TouchableWithoutFeedback,
 } from "react-native";
+import { Picker } from "@react-native-picker/picker";
 import { db } from "../firebase";
 import { doc, addDoc, Timestamp, collection } from "firebase/firestore";
-import { Ionicons } from '@expo/vector-icons';
+import { Ionicons } from "@expo/vector-icons";
 import axios from "axios";
-import _ from "lodash"; // Import lodash
+import _ from "lodash";
 
 const FoodSearchScreen = ({ route }) => {
   const { meal } = route.params;
   const [searchQuery, setSearchQuery] = useState("");
   const [searchResults, setSearchResults] = useState([]);
   const [selectedFood, setSelectedFood] = useState(null);
+  const [showModal, setShowModal] = useState(false);
+  const [servingSize, setServingSize] = useState("");
+  const [servingMeasurement, setServingMeasurement] = useState("");
+  const [healthLabels, setHealthLabels] = useState([]);
+  const [missingLabels, setMissingLabels] = useState([]);
 
+  const appKey = process.env["APP_KEY"];
+  const appId = process.env["APP_ID"];
+
+  const desiredHealthLabels = [
+    "ALCOHOL_FREE",
+    "CELERY_FREE",
+    "CRUSTACEAN_FREE",
+    "DAIRY_FREE",
+    "EGG_FREE",
+    "FISH_FREE",
+    "GLUTEN_FREE",
+    "KETO_FRIENDLY",
+    "LOW_FAT_ABS",
+    "LOW_SUGAR",
+    "PALEO",
+    "PEANUT_FREE",
+    "PORK_FREE",
+    "RED_MEAT_FREE",
+    "SESAME_FREE",
+    "SHELLFISH_FREE",
+    "SOY_FREE",
+    "TREE_NUT_FREE",
+    "VEGAN",
+    "VEGETARIAN",
+    "WHEAT_FREE"
+];
+
+
+
+  const capitalizeWords = (str) => {
+    return str.toLowerCase().replace(/\b\w/g, (char) => char.toUpperCase());
+  };
   
+
   const delayedQuery = useCallback(
     _.debounce((text) => {
       if (text.trim() !== "") {
-
-        const appKey = process.env['APP_KEY'];
-        const appId = process.env['APP_ID'];
         const apiUrl = `https://api.edamam.com/api/food-database/v2/parser?ingr=${text}&app_id=${appId}&app_key=${appKey}`;
 
         axios
@@ -46,27 +85,69 @@ const FoodSearchScreen = ({ route }) => {
   );
 
   useEffect(() => {
-    delayedQuery(searchQuery); // Call the debounced function
-    return delayedQuery.cancel; // Cleanup the debounced function on unmount
+    delayedQuery(searchQuery);
+    return delayedQuery.cancel;
   }, [searchQuery, delayedQuery]);
 
-  const handleFoodItemClick = async (food) => {
-    
+  const handleFoodItemClick = (food) => {
     setSelectedFood(food);
-    let foodId = food.food;
-  
-    const docRef = await addDoc(collection(db, "savedFoods"), {
-      //date: Timestamp,
-      meal,
-      foodId,
-    });
-};
+    setServingSize(1);
+    setShowModal(true);
+  };
 
+  const saveSelectedFood = async () => {
+    setShowModal(false);
+
+    const requestBody = {
+      ingredients: [
+        {
+          quantity: servingSize,
+          measureURI: servingMeasurement,
+          foodId: selectedFood.food.foodId,
+        },
+      ],
+    };
+
+    try {
+      const response = await axios.post(
+        `https://api.edamam.com/api/food-database/v2/nutrients?app_id=${appId}&app_key=${appKey}`,
+        requestBody
+      );
+
+
+
+      
+      let missingLabels = desiredHealthLabels.filter(label => !response.data.healthLabels.includes(label));
+      if (!response.data.healthLabels) {
+        missingLabels= [];
+      };
+
+     
+      const docRef = await addDoc(collection(db, "savedFoods"), {
+        name: selectedFood.food.knownAs,
+        servingSize: servingSize,
+        servingMeasurement: servingMeasurement,
+        foodId: selectedFood.food.foodId,
+        healthLabels: response.data.healthLabels,
+        missingLabels: missingLabels,
+      });
+
+    } catch (error) {
+      console.error("Error making request:", error);
+    }
+
+
+  };
 
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.searchContainer}>
-        <Ionicons name="search" size={24} color="black" style={styles.searchIcon} />
+        <Ionicons
+          name="search"
+          size={24}
+          color="black"
+          style={styles.searchIcon}
+        />
         <TextInput
           style={styles.textInput}
           placeholder="Search for food..."
@@ -76,32 +157,111 @@ const FoodSearchScreen = ({ route }) => {
       </View>
 
       {selectedFood && (
-        <View>
-          <Text>Selected Food: {selectedFood.food.label}</Text>
-        </View>
-      )}
-      <ScrollView style={styles.resultContainer}>
-      {searchResults.map((food, index) => (
-        <TouchableOpacity
-          key={`${food.food.foodId}-${index}`} // Using a combination of foodId and index
-          onPress={() => handleFoodItemClick(food)}
-          style={styles.resultItem}
+        <Modal
+          visible={showModal}
+          animationType="slide"
+          transparent={true}
+          onRequestClose={() => setShowModal(false)}
         >
-          <Text style={styles.resultText}>
-            {food.food.label} 
-          </Text>
-        </TouchableOpacity>
-      ))}
+          <TouchableWithoutFeedback onPress={() => setShowModal(false)}>
+            <View style={styles.modalContainer}>
+              <TouchableWithoutFeedback>
+                <View style={styles.modalContent}>
+                  <Text style={styles.selectedFoodLabel}>
+                    {capitalizeWords(selectedFood.food.knownAs)}
+                  </Text>
+                 
+                  {selectedFood.food.image ? (
+                    <Image
+                      source={{ uri: selectedFood.food.image }}
+                      style={styles.image}
+                    />
+                  ) : null}
+                  {selectedFood.food.brand ? <Text style={styles.additionalInfoText}>Brand: {selectedFood.food.brand}</Text>: null}
+                  {selectedFood.food.category ? <Text style={styles.additionalInfoText}>Category: {selectedFood.food.category}</Text>: null}
+      
+            
 
+
+                  <View style={styles.inputContainer}>
+                    <View style={styles.pickerContainer}>
+                      <Picker
+                        selectedValue={servingSize}
+                        onValueChange={(itemValue, itemIndex) =>
+                          setServingSize(itemValue)
+                        }
+                      >
+                        {[...Array(25).keys()].map((number) => (
+                          <Picker.Item
+                            key={number}
+                            label={`${number + 1}`}
+                            value={`${number + 1}`}
+                          />
+                        ))}
+                      </Picker>
+                    </View>
+                    <View style={styles.pickerContainer}>
+                      <Picker
+                        selectedValue={servingMeasurement}
+                        onValueChange={(itemValue, itemIndex) =>
+                          setServingMeasurement(itemValue)
+                        }
+                      >
+                        {selectedFood?.measures.map((measurement, index) => (
+                          <Picker.Item
+                            key={index}
+                            label={measurement.label}
+                            value={measurement.uri}
+                          />
+                        ))}
+                      </Picker>
+                    </View>
+                  </View>
+                  <View style={styles.buttons}>
+                    <Button title="Save" onPress={saveSelectedFood} />
+                    <Button
+                      title="Cancel"
+                      onPress={() => setShowModal(false)}
+                    />
+                  </View>
+                </View>
+              </TouchableWithoutFeedback>
+            </View>
+          </TouchableWithoutFeedback>
+        </Modal>
+      )}
+
+      <ScrollView style={styles.resultContainer}>
+        {searchResults.map((food, index) => (
+          <TouchableOpacity
+            key={`${food.food.foodId}-${index}`}
+            onPress={() => handleFoodItemClick(food)}
+            style={styles.resultItem}
+          >
+            <Text style={styles.resultText}>{capitalizeWords(food.food.knownAs)}</Text>
+          </TouchableOpacity>
+        ))}
       </ScrollView>
     </SafeAreaView>
   );
 };
 
 const styles = StyleSheet.create({
+  buttons: {
+    flexDirection: "row",
+  },
   container: {
     flex: 1,
     alignItems: "center",
+  },
+  inputContainer: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    marginBottom: 10,
+  },
+  pickerContainer: {
+    flex: 1,
+    marginRight: 5,
   },
   searchContainer: {
     flexDirection: "row",
@@ -126,17 +286,54 @@ const styles = StyleSheet.create({
     width: "92%",
   },
   resultItem: {
-    flexDirection: 'row', // Ensure items are laid out in a row
-    alignItems: 'center', // Align items vertically within their container
-    backgroundColor: 'white',
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "white",
     padding: 10,
     marginBottom: 5,
     borderRadius: 5,
   },
+  imageContainer: {
+    width: 200,
+    height: 200,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  image: {
+    width: 200,
+    height: 200,
+    resizeMode: "contain",
+  },
   resultText: {
-    flex: 1, // Allow text to expand to fill available space
+    flex: 1,
     fontSize: 17,
-    color: 'black',
+    color: "black",
+  },
+  modalContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
+  },
+  modalContent: {
+    backgroundColor: "white",
+    padding: 20,
+    borderRadius: 10,
+    elevation: 5,
+    shadowColor: "black",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 5,
+    width: "80%",
+  },
+  selectedFoodLabel: {
+    fontSize: 24,
+    fontWeight: "bold",
+    marginBottom: 10,
+  },
+  additionalInfoText: {
+    fontSize: 16,
+    marginBottom: 5,
   },
 });
 
