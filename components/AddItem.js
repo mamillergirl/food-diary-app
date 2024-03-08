@@ -11,7 +11,7 @@ const AddItem = ({ content, type}) => {
   return (
     <>
       <View style={[styles.outsideContainer]}>
-        <TouchableOpacity style={[styles.container]} onPress={() => navigation.navigate('FoodSearchScreen', {meal: type})} >
+        <TouchableOpacity style={[styles.container]} onPress={() => navigation.navigate('Search Foods', {meal: type})} >
           <View style={styles.subcontainer}> 
             <Text style={[styles.heading]}>{content}</Text>
           </View>

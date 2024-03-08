@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { View, TouchableOpacity, Text, StyleSheet } from "react-native";
 import Slider from "@react-native-community/slider";
 import { db } from "../firebase";
@@ -36,10 +36,31 @@ const SymptomCard = ({ color, type }) => {
       console.error("Error updating/adding document: ", error);
     }
   };
+  
+  const fetchSymptom = async () => {
+    const currentDate = new Date().toISOString().split('T')[0];
+    const key = `${currentDate}_${type.toLowerCase()}`;
+    try {
+      const docRef = doc(db, "symptoms", key);
+      const docSnapshot = await getDoc(docRef);
+      if (docSnapshot.exists()) {
+        const data = docSnapshot.data();
+        if (data.level) {
+          setSliderValue(data.level);
+        } 
+      }
+     
+    } catch (error) {
+      console.error("Error fetching symptoms: ", error);
+    }
+  };
 
+  useEffect(() => {
+    fetchSymptom();
+  }, [])
   return (
     <>
-      <TouchableOpacity style={[styles.container]}>
+      <View style={[styles.container]}>
         <View style={styles.subcontainer}>
           <View style={[styles.side, { backgroundColor: color }]}></View>
           <Text style={[styles.heading, { color: color }]}>{type}</Text>
@@ -52,9 +73,10 @@ const SymptomCard = ({ color, type }) => {
           minimumTrackTintColor="#FF655B"
           maximumTrackTintColor="#000000"
           onValueChange={onValueChange}
+          value={sliderValue}
         />
         <Icon name={icons[sliderValue]} size={32} color="black" />
-      </TouchableOpacity>
+      </View>
     </>
   );
 };

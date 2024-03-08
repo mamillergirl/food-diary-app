@@ -13,7 +13,7 @@ function HomeNav() {
 
       <Stack.Navigator>
         <Stack.Screen name="HomeScreen" options={{ headerShown: false}} component={Home} />
-        <Stack.Screen name="FoodSearchScreen" component={FoodSearchScreen} />
+        <Stack.Screen name="Search Foods" component={FoodSearchScreen} />
         <Stack.Screen name="SymptomSelector" component={SymptomSelector} />
       </Stack.Navigator>
 

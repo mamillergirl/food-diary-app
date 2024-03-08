@@ -20,38 +20,24 @@ export default function ChartComponent() {
 
         }
       }
-     
     } catch (error) {
       console.error("Error fetching symptoms: ", error);
     }
   };
 
-
-    
-    
-
   useEffect(() => {
-    const unsubscribe = fetchSymptomData();
     fetchSymptoms();
-
-    return unsubscribe;
+    fetchSymptomData();
   }, []);
 
   const fetchSymptomData = () => {
-    const unsubscribe = {};
-
-    // Define the types you want to fetch
-    const types = ["diarrhea", "fever", "headache"]; // Add more types as needed
-
     symptoms?.forEach(type => {
       const q = query(collection(db, "symptoms"), where("type", "==", type.toLowerCase()), orderBy("day", "asc"));
-
-      unsubscribe[type] = onSnapshot(q, querySnapshot => {
+      const unsubscribe = onSnapshot(q, querySnapshot => {
         const data = [];
         querySnapshot.forEach(doc => {
           const { day, level } = doc.data();
           const date = new Date(day.toDate()).toLocaleDateString();
-
           const numericLevel = parseFloat(level);
 
           if (!isNaN(numericLevel)) {
@@ -68,11 +54,9 @@ export default function ChartComponent() {
           }));
         }
       });
-    });
 
-    return () => {
-      Object.values(unsubscribe).forEach(unsub => unsub());
-    };
+      return () => unsubscribe();
+    });
   };
 
   // Display debug text to check if data is fetched
@@ -91,37 +75,36 @@ export default function ChartComponent() {
           <React.Fragment key={type}>
             <Text style={styles.heading}>{type}</Text>
             <LineChart
-      
               data={{
-                labels: data.map(dataPoint => dataPoint.date),
+                labels: data.map((dataPoint) => dataPoint.date),
                 datasets: [
                   {
-                    data: data.map(dataPoint => dataPoint.level)
-                  }
-                ]
+                    data: data.map((dataPoint) => dataPoint.level),
+                  },
+                ],
               }}
               width={Dimensions.get("window").width}
               height={220}
               chartConfig={{
-                backgroundColor: "#e26a00",
-                backgroundGradientFrom: "#fb8c00",
-                backgroundGradientTo: "#ffa726",
+                backgroundColor: "#6DA0D1",
+                backgroundGradientFrom: "#82B366",
+                backgroundGradientTo: "#82B366",
                 decimalPlaces: 2, // optional, defaults to 2dp
                 color: (opacity = 1) => `rgba(255, 255, 255, ${opacity})`,
                 labelColor: (opacity = 1) => `rgba(255, 255, 255, ${opacity})`,
                 style: {
-                  borderRadius: 16
+                  borderRadius: 16,
                 },
                 propsForDots: {
                   r: "6",
                   strokeWidth: "2",
-                  stroke: "#ffa726"
-                }
+                  stroke: "#ffffff",
+                },
               }}
+              yAxisInterval={1}
               bezier
               fromZero
               style={styles.chart}
-          
             />
           </React.Fragment>
         ))}
@@ -133,12 +116,11 @@ const styles = StyleSheet.create({
   chart: {
     borderRadius: 16,
     marginVertical: 8,
-
   },
   heading: {
     fontSize: 22,
     fontWeight: "bold",
     marginBottom: 10,
-    marginLeft: 10
-  }
+    marginLeft: 10,
+  },
 });

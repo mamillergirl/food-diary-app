@@ -2,11 +2,7 @@ import React from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { Ionicons } from '@expo/vector-icons';
-
-import FoodSearchScreen from './components/FoodSearchScreen';
-import HomeNav from './components/homeNav';
-
-import SymptomSelector from './components/SymptomSelector';
+import HomeNav from './components/HomeNav';
 import Insights from './components/Insights';
 
 const Tab = createBottomTabNavigator();
