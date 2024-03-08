@@ -15,17 +15,20 @@ import {
 import { Picker } from "@react-native-picker/picker";
 import { db } from "../firebase";
 import { doc, addDoc, Timestamp, collection } from "firebase/firestore";
+import { useNavigation } from "@react-navigation/native";
 import { Ionicons } from "@expo/vector-icons";
 import axios from "axios";
 import _ from "lodash";
 
 const FoodSearchScreen = ({ route }) => {
+  const navigation = useNavigation();
   const { meal } = route.params;
   const [searchQuery, setSearchQuery] = useState("");
   const [searchResults, setSearchResults] = useState([]);
+  const [filteredResults, setFilteredResults] = useState([]);
   const [selectedFood, setSelectedFood] = useState(null);
   const [showModal, setShowModal] = useState(false);
-  const [servingSize, setServingSize] = useState("");
+  const [servingSize, setServingSize] = useState(1);
   const [servingMeasurement, setServingMeasurement] = useState("");
   const [healthLabels, setHealthLabels] = useState([]);
   const [missingLabels, setMissingLabels] = useState([]);
@@ -54,29 +57,39 @@ const FoodSearchScreen = ({ route }) => {
     "TREE_NUT_FREE",
     "VEGAN",
     "VEGETARIAN",
-    "WHEAT_FREE"
-];
+    "WHEAT_FREE",
+  ];
 
 
 
   const capitalizeWords = (str) => {
     return str.toLowerCase().replace(/\b\w/g, (char) => char.toUpperCase());
   };
-  
 
   const delayedQuery = useCallback(
     _.debounce((text) => {
       if (text.trim() !== "") {
         const apiUrl = `https://api.edamam.com/api/food-database/v2/parser?ingr=${text}&app_id=${appId}&app_key=${appKey}`;
-
+        const filtered = [];
         axios
           .get(apiUrl)
           .then((response) => {
+            
             setSearchResults(response.data.hints);
+            response.data.hints.forEach(element => {
+              if(findHealthLabels(element)){
+                filtered.push(element);
+              }
+              
+            });
+            setFilteredResults(filtered);
           })
+          
           .catch((error) => {
             console.error("Error fetching data:", error);
           });
+
+         
       } else {
         setSearchResults([]);
       }
@@ -84,14 +97,40 @@ const FoodSearchScreen = ({ route }) => {
     []
   );
 
+  const findHealthLabels = async(food) => {
+    let requestBody = {
+      ingredients: [
+        {
+          quantity: 1,
+          measureURI: food.measures[0].uri,
+          foodId: food.food.foodId
+        }
+      ],
+    };
+    
+    const response = await axios.post(
+      `https://api.edamam.com/api/food-database/v2/nutrients?app_id=${appId}&app_key=${appKey}`,
+      requestBody
+    );
+    
+    if (response.data.healthLabels.length > 0) {
+      return true;
+    } 
+  }
+
   useEffect(() => {
+   
     delayedQuery(searchQuery);
+   
     return delayedQuery.cancel;
+
+    
   }, [searchQuery, delayedQuery]);
 
   const handleFoodItemClick = (food) => {
     setSelectedFood(food);
     setServingSize(1);
+    setServingMeasurement(food.measures[0].uri);
     setShowModal(true);
   };
 
@@ -108,35 +147,44 @@ const FoodSearchScreen = ({ route }) => {
       ],
     };
 
+
     try {
       const response = await axios.post(
         `https://api.edamam.com/api/food-database/v2/nutrients?app_id=${appId}&app_key=${appKey}`,
         requestBody
       );
-
-
-
       
-      let missingLabels = desiredHealthLabels.filter(label => !response.data.healthLabels.includes(label));
-      if (!response.data.healthLabels) {
-        missingLabels= [];
-      };
-
      
-      const docRef = await addDoc(collection(db, "savedFoods"), {
+      let missingLabels = desiredHealthLabels.filter(
+        (label) => !response.data.healthLabels.includes(label)
+      );
+     
+     
+  
+
+      const currentDate = new Date().toISOString().split("T")[0];
+
+      const parentCollectionRef = collection(db, "savedFoods");
+      const collectionDocRef = doc(parentCollectionRef, currentDate);
+
+      const mealCollectionRef = collection(
+        collectionDocRef, `${currentDate}_${meal.toLowerCase()}`);
+
+      const docRef = await addDoc(mealCollectionRef, {
         name: selectedFood.food.knownAs,
         servingSize: servingSize,
         servingMeasurement: servingMeasurement,
         foodId: selectedFood.food.foodId,
         healthLabels: response.data.healthLabels,
         missingLabels: missingLabels,
-      });
-
+      }).then(() => {
+        navigation.navigate("HomeScreen");
+      })
+  
+      
     } catch (error) {
       console.error("Error making request:", error);
     }
-
-
   };
 
   return (
@@ -151,7 +199,7 @@ const FoodSearchScreen = ({ route }) => {
         <TextInput
           style={styles.textInput}
           placeholder="Search for food..."
-          onChangeText={(text) => setSearchQuery(text)}
+          onChangeText={(text) => {setSearchQuery(text); setFilteredResults([])}}
           value={searchQuery}
         />
       </View>
@@ -170,18 +218,23 @@ const FoodSearchScreen = ({ route }) => {
                   <Text style={styles.selectedFoodLabel}>
                     {capitalizeWords(selectedFood.food.knownAs)}
                   </Text>
-                 
+
                   {selectedFood.food.image ? (
                     <Image
                       source={{ uri: selectedFood.food.image }}
                       style={styles.image}
                     />
                   ) : null}
-                  {selectedFood.food.brand ? <Text style={styles.additionalInfoText}>Brand: {selectedFood.food.brand}</Text>: null}
-                  {selectedFood.food.category ? <Text style={styles.additionalInfoText}>Category: {selectedFood.food.category}</Text>: null}
-      
-            
-
+                  {selectedFood.food.brand ? (
+                    <Text style={styles.additionalInfoText}>
+                      Brand: {selectedFood.food.brand}
+                    </Text>
+                  ) : null}
+                  {selectedFood.food.category ? (
+                    <Text style={styles.additionalInfoText}>
+                      Category: {selectedFood.food.category}
+                    </Text>
+                  ) : null}
 
                   <View style={styles.inputContainer}>
                     <View style={styles.pickerContainer}>
@@ -232,13 +285,15 @@ const FoodSearchScreen = ({ route }) => {
       )}
 
       <ScrollView style={styles.resultContainer}>
-        {searchResults.map((food, index) => (
+        {filteredResults.map((food, index) => (
           <TouchableOpacity
             key={`${food.food.foodId}-${index}`}
             onPress={() => handleFoodItemClick(food)}
             style={styles.resultItem}
           >
-            <Text style={styles.resultText}>{capitalizeWords(food.food.knownAs)}</Text>
+            <Text style={styles.resultText}>
+              {capitalizeWords(food.food.knownAs)}
+            </Text>
           </TouchableOpacity>
         ))}
       </ScrollView>
