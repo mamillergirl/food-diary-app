@@ -2,12 +2,12 @@ import React, { useState, useEffect } from "react";
 import { SafeAreaView, Dimensions, Text, ScrollView, StyleSheet} from "react-native";
 import { LineChart } from "react-native-chart-kit";
 import { firebase, db } from "../firebase";
-import { collection, query, where, orderBy, doc, getDoc, onSnapshot } from "firebase/firestore";
+import { collection, query, where, orderBy, doc, getDoc, getDocs, onSnapshot } from "firebase/firestore";
 
 export default function ChartComponent() {
-
   const [graphData, setGraphData] = useState({});
   const [symptoms, setSymptoms] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   const fetchSymptoms = async () => {
     try {
@@ -17,7 +17,6 @@ export default function ChartComponent() {
         const data = docSnapshot.data();
         if (data.trackSymptoms) {
           setSymptoms(data.trackSymptoms);
-
         }
       }
     } catch (error) {
@@ -27,43 +26,53 @@ export default function ChartComponent() {
 
   useEffect(() => {
     fetchSymptoms();
-    fetchSymptomData();
   }, []);
 
+  useEffect(() => {
+    if (symptoms.length > 0) {
+      fetchSymptomData();
+    }
+  }, [symptoms]);
+
   const fetchSymptomData = () => {
-    symptoms?.forEach(type => {
-      const q = query(collection(db, "symptoms"), where("type", "==", type.toLowerCase()), orderBy("day", "asc"));
-      const unsubscribe = onSnapshot(q, querySnapshot => {
-        const data = [];
-        querySnapshot.forEach(doc => {
-          const { day, level } = doc.data();
-          const date = new Date(day.toDate()).toLocaleDateString();
-          const numericLevel = parseFloat(level);
-
-          if (!isNaN(numericLevel)) {
-            data.push({ date, level: numericLevel });
-          } else {
-            console.log("Invalid level value:", level);
-          }
-        });
-
-        if (data.length > 0) {
-          setGraphData(prevState => ({
-            ...prevState,
-            [type]: data
-          }));
+    setLoading(true);
+    const promises = symptoms.map(async (type) => {
+      const q = query(
+        collection(db, "symptoms"),
+        where("type", "==", type.toLowerCase()),
+        orderBy("day", "asc")
+      );
+      const querySnapshot = await getDocs(q);
+      const data = [];
+      querySnapshot.forEach((doc) => {
+        const { day, level } = doc.data();
+        const date = new Date(day.toDate()).toLocaleDateString();
+        const numericLevel = parseFloat(level);
+        if (!isNaN(numericLevel)) {
+          data.push({ date, level: numericLevel });
+        } else {
+          console.log("Invalid level value:", level);
         }
       });
+      return { type, data };
+    });
 
-      return () => unsubscribe();
+    Promise.all(promises).then((results) => {
+      const newGraphData = {};
+      results.forEach((result) => {
+        if (result.data.length > 0) {
+          newGraphData[result.type] = result.data;
+        }
+      });
+      setGraphData(newGraphData);
+      setLoading(false);
     });
   };
 
-  // Display debug text to check if data is fetched
-  if (Object.keys(graphData).length === 0) {
+  if (loading) {
     return (
       <SafeAreaView>
-        <Text>No data available</Text>
+        <Text>Loading...</Text>
       </SafeAreaView>
     );
   }
@@ -89,7 +98,7 @@ export default function ChartComponent() {
                 backgroundColor: "#6DA0D1",
                 backgroundGradientFrom: "#82B366",
                 backgroundGradientTo: "#82B366",
-                decimalPlaces: 2, // optional, defaults to 2dp
+                decimalPlaces: 2,
                 color: (opacity = 1) => `rgba(255, 255, 255, ${opacity})`,
                 labelColor: (opacity = 1) => `rgba(255, 255, 255, ${opacity})`,
                 style: {
@@ -112,6 +121,7 @@ export default function ChartComponent() {
     </SafeAreaView>
   );
 }
+
 const styles = StyleSheet.create({
   chart: {
     borderRadius: 16,

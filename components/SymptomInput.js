@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useCallback } from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import { View, StyleSheet } from 'react-native';
 import { db } from "../firebase";
 import { getDoc, doc } from "firebase/firestore";
 import { useFocusEffect } from '@react-navigation/native';
@@ -7,7 +7,7 @@ import { useFocusEffect } from '@react-navigation/native';
 import SymptomCard from './SymptomCard';
 import AddSymptom from './AddSymptom';
 
-const SymptomInput = ({ headingText, color }) => {
+const SymptomInput = ({ headingText, color, date }) => {
   const [symptoms, setSymptoms] = useState([]);
 
   const fetchSymptoms = async () => {
@@ -27,10 +27,10 @@ const SymptomInput = ({ headingText, color }) => {
   };
 
   useEffect(() => {
-    
     fetchSymptoms();
-  }, []);
+  }, [date]);
 
+  // Ensure that fetchSymptoms is called whenever the screen is focused
   useFocusEffect(
     useCallback(() => {
       fetchSymptoms();
@@ -44,9 +44,9 @@ const SymptomInput = ({ headingText, color }) => {
           key={index}
           color='#FF655B'
           type={symptom}
+          date={date} // Pass the date prop down to SymptomCard
         />
       ))}
- 
       <AddSymptom />
     </View>
   );

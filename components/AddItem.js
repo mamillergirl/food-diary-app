@@ -1,18 +1,22 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { View, TouchableOpacity, Text, StyleSheet } from "react-native";
 import { useNavigation } from '@react-navigation/native';
 
-const AddItem = ({ content, type}) => {
-
+const AddItem = ({ content, type, date, path}) => {
+  const [currentDate, setCurrentDate] = useState(date);
   const navigation = useNavigation();
 
-
+  // useEffect to trigger when the date prop changes
+  useEffect(() => {
+    setCurrentDate(date);
+ 
+  }, [date]);
 
   return (
     <>
       <View style={[styles.outsideContainer]}>
-        <TouchableOpacity style={[styles.container]} onPress={() => navigation.navigate('Search Foods', {meal: type})} >
-          <View style={styles.subcontainer}> 
+        <TouchableOpacity style={[styles.container]} onPress={() => navigation.navigate('Search Foods', { meal: type, currentDate: currentDate, path:path })} >
+          <View style={styles.subcontainer}>
             <Text style={[styles.heading]}>{content}</Text>
           </View>
           <Text style={[styles.heading]}>+</Text>

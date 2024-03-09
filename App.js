@@ -2,9 +2,10 @@ import React from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { Ionicons } from '@expo/vector-icons';
+
 import HomeNav from './components/HomeNav';
 import Insights from './components/Insights';
-
+import WeekView from './components/WeekView';
 const Tab = createBottomTabNavigator();
 
 const App = () => {
@@ -25,7 +26,16 @@ const App = () => {
           }}
           independent={true} 
           />        
-      
+        <Tab.Screen
+        name="Week"
+        component={WeekView}
+        options={{
+          tabBarIcon: ({ color, size }) => (
+            <Ionicons name="calendar" color={color} size={size} />
+          ),
+          headerShown: false,
+        }}
+      />
         <Tab.Screen
           name="Insights"
           component={Insights}

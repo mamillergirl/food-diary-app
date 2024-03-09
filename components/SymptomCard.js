@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from "react";
-import { View, TouchableOpacity, Text, StyleSheet } from "react-native";
+import { View, Text, StyleSheet } from "react-native";
 import Slider from "@react-native-community/slider";
 import { db } from "../firebase";
-import { collection, Timestamp, getDoc, doc, setDoc, updateDoc } from "firebase/firestore";
+import { collection, Timestamp, getDoc, doc, setDoc } from "firebase/firestore";
 import Icon from 'react-native-vector-icons/MaterialIcons'; 
 
-const SymptomCard = ({ color, type }) => {
+const SymptomCard = ({ color, type, date }) => {
   const [sliderValue, setSliderValue] = useState(0);
 
   const icons = {
@@ -18,28 +18,21 @@ const SymptomCard = ({ color, type }) => {
 
   const onValueChange = async (value) => {
     setSliderValue(value);
-
- 
-    const currentDate = new Date().toISOString().split('T')[0];
-    const key = `${currentDate}_${type.toLowerCase()}`;
+    const key = `${date}_${type.toLowerCase()}`;
 
     try {
-        
-        await setDoc(doc(db, 'symptoms', key), {
-            level: value,
-            day: Timestamp.fromDate(new Date()),
-            type: type.toLowerCase(),
-
-        });
-      
+      await setDoc(doc(db, 'symptoms', key), {
+        level: value,
+        day: Timestamp.fromDate(new Date()),
+        type: type.toLowerCase(),
+      });
     } catch (error) {
       console.error("Error updating/adding document: ", error);
     }
   };
-  
-  const fetchSymptom = async () => {
-    const currentDate = new Date().toISOString().split('T')[0];
-    const key = `${currentDate}_${type.toLowerCase()}`;
+
+  const fetchSymptom = async (symptomDate) => {
+    const key = `${symptomDate}_${type.toLowerCase()}`;
     try {
       const docRef = doc(db, "symptoms", key);
       const docSnapshot = await getDoc(docRef);
@@ -47,17 +40,22 @@ const SymptomCard = ({ color, type }) => {
         const data = docSnapshot.data();
         if (data.level) {
           setSliderValue(data.level);
-        } 
+        } else {
+          setSliderValue(0); // Reset slider value if no data found
+        }
+      } else {
+        setSliderValue(0); // Reset slider value if no data found
       }
-     
     } catch (error) {
       console.error("Error fetching symptoms: ", error);
     }
   };
 
+
   useEffect(() => {
-    fetchSymptom();
-  }, [])
+    fetchSymptom(date);
+  }, [date]);
+
   return (
     <>
       <View style={[styles.container]}>

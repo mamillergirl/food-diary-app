@@ -1,45 +1,48 @@
 import React, { useState, useEffect } from 'react';
 import { View, TouchableOpacity, Text, StyleSheet, Button } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { useFonts, Inter_400Regular } from '@expo-google-fonts/inter';
+import { useFocusEffect } from '@react-navigation/native';
 import { db } from "../firebase";
 import { doc, getDocs, collection, deleteDoc } from "firebase/firestore";
-import { useFocusEffect } from '@react-navigation/native';
 
 import AddItem from './AddItem';
 
-const Card = ({ color, type, category, navigation }) => {
-  const [isOpen, setIsOpen] = useState(false); // State to track whether the component is open
+const Card = ({ color, type, category, navigation, date, path}) => { 
+  const [isOpen, setIsOpen] = useState(false);
   const [foods, setFoods] = useState([]);
-  const currentDate = new Date().toISOString().split("T")[0];
-  const parentCollectionRef = collection(db, "savedFoods");
-  const collectionDocRef = doc(parentCollectionRef, currentDate);
-  const mealCollectionRef = collection(collectionDocRef, `${currentDate}_${type.toLowerCase()}`);
 
-  const getFoods = async () => {
+  const getFoods = async (mealCollectionRef) => {
     const querySnapshot = await getDocs(mealCollectionRef);
     const data = querySnapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
     setFoods(data);
   };
 
   const deleteFood = async (id) => {
+    const parentCollectionRef = collection(db, "savedFoods");
+    const collectionDocRef = doc(parentCollectionRef, date);
+    const mealCollectionRef = collection(collectionDocRef, `${date}_${type.toLowerCase()}`);
     await deleteDoc(doc(mealCollectionRef, id));
-    getFoods();
+    getFoods(mealCollectionRef); // Pass mealCollectionRef here
   };
 
-  // Fetch data on component mount and whenever the screen is navigated back to
   useEffect(() => {
-    getFoods();
-  }, []);
+    const parentCollectionRef = collection(db, "savedFoods");
+    const collectionDocRef = doc(parentCollectionRef, date);
+    const mealCollectionRef = collection(collectionDocRef, `${date}_${type.toLowerCase()}`);
+    getFoods(mealCollectionRef);
+
+  }, [date]); 
 
   // Fetch data whenever the screen is focused
   useFocusEffect(
     React.useCallback(() => {
-      getFoods();
+      const parentCollectionRef = collection(db, "savedFoods");
+      const collectionDocRef = doc(parentCollectionRef, date);
+      const mealCollectionRef = collection(collectionDocRef, `${date}_${type.toLowerCase()}`);
+      getFoods(mealCollectionRef);
     }, [])
   );
 
-  // Function to toggle the component
   const toggleComponent = () => {
     setIsOpen(!isOpen);
   };
@@ -57,7 +60,7 @@ const Card = ({ color, type, category, navigation }) => {
           color="black"
         />
       </TouchableOpacity>
-      {isOpen ? <AddItem content="Add Food" type={type} /> : <></>}
+      {isOpen ? <AddItem path={path} date={date} content="Add Food" type={type} /> : <></>}
       {isOpen && foods.map((food) => (
         <View style={styles.foodContainer} key={food.id}>
           <Text style={styles.food}>

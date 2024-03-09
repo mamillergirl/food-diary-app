@@ -22,7 +22,7 @@ import _ from "lodash";
 
 const FoodSearchScreen = ({ route }) => {
   const navigation = useNavigation();
-  const { meal } = route.params;
+  const { meal, currentDate,path} = route.params;
   const [searchQuery, setSearchQuery] = useState("");
   const [searchResults, setSearchResults] = useState([]);
   const [filteredResults, setFilteredResults] = useState([]);
@@ -30,7 +30,6 @@ const FoodSearchScreen = ({ route }) => {
   const [showModal, setShowModal] = useState(false);
   const [servingSize, setServingSize] = useState(1);
   const [servingMeasurement, setServingMeasurement] = useState("");
-  const [healthLabels, setHealthLabels] = useState([]);
   const [missingLabels, setMissingLabels] = useState([]);
 
   const appKey = process.env["APP_KEY"];
@@ -76,13 +75,13 @@ const FoodSearchScreen = ({ route }) => {
           .then((response) => {
             
             setSearchResults(response.data.hints);
-            response.data.hints.forEach(element => {
-              if(findHealthLabels(element)){
-                filtered.push(element);
-              }
+            // response.data.hints.forEach(element => {
+            //   if(findHealthLabels(element)){
+            //     filtered.push(element);
+            //   }
               
-            });
-            setFilteredResults(filtered);
+            // });
+            setFilteredResults(response.data.hints);
           })
           
           .catch((error) => {
@@ -119,13 +118,13 @@ const FoodSearchScreen = ({ route }) => {
   }
 
   useEffect(() => {
-   
+
     delayedQuery(searchQuery);
    
     return delayedQuery.cancel;
 
     
-  }, [searchQuery, delayedQuery]);
+  }, [searchQuery, delayedQuery, currentDate]);
 
   const handleFoodItemClick = (food) => {
     setSelectedFood(food);
@@ -158,27 +157,38 @@ const FoodSearchScreen = ({ route }) => {
       let missingLabels = desiredHealthLabels.filter(
         (label) => !response.data.healthLabels.includes(label)
       );
-     
-     
-  
-
-      const currentDate = new Date().toISOString().split("T")[0];
+      
+      let healthLabels;
+      if (response.data.healthLabels.length > 0) {
+        healthLabels = response.data.healthLabels;
+      } else {
+        healthLabels = [];
+      }
+      let cautions;
+      if (response.data.cautions.length > 0) {
+        cautions = response.data.cautions;
+      } else {
+        cautions = [];
+      }
 
       const parentCollectionRef = collection(db, "savedFoods");
       const collectionDocRef = doc(parentCollectionRef, currentDate);
 
       const mealCollectionRef = collection(
         collectionDocRef, `${currentDate}_${meal.toLowerCase()}`);
+    
+      
 
       const docRef = await addDoc(mealCollectionRef, {
         name: selectedFood.food.knownAs,
         servingSize: servingSize,
         servingMeasurement: servingMeasurement,
         foodId: selectedFood.food.foodId,
-        healthLabels: response.data.healthLabels,
+        healthLabels: healthLabels,
         missingLabels: missingLabels,
+        cautions: cautions,
       }).then(() => {
-        navigation.navigate("HomeScreen");
+        navigation.navigate(path);
       })
   
       

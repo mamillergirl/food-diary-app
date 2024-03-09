@@ -1,11 +1,29 @@
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { SafeAreaView, View,  Text, ScrollView, Image, StyleSheet } from 'react-native';
 import Header from './Header';
 import MealInput from './MealInput';
 import SymptomInput from './SymptomInput';
 
 export default function Home (){
+  const [currentDate, setCurrentDate] = useState(getFormattedDate());
+
+  function getFormattedDate() {
+    const today = new Date();
+    const year = today.getFullYear();
+    let month = today.getMonth() + 1;
+    let day = today.getDate();
+
+    // Add leading zeros if month/day is less than 10
+    if (month < 10) {
+      month = '0' + month;
+    }
+    if (day < 10) {
+      day = '0' + day;
+    }
+
+    return `${year}-${month}-${day}`;
+  }
   return (
     <SafeAreaView style={styles.container}>
       
@@ -16,11 +34,11 @@ export default function Home (){
 
         <ScrollView>
         <Text style={styles.subheading}>Daily Meals</Text>
-        <MealInput headingText="Meal Input" />
+        <MealInput path={'HomeScreen'} date={currentDate} headingText="Meal Input" />
    
 
-        <Text style={styles.subheading}>Daily Symptoms</Text>
-        <SymptomInput headingText="Symptom Input" />
+        <Text style={styles.subheading}>Symptom Overview</Text>
+        <SymptomInput date={currentDate} headingText="Symptom Input" />
        
       </ScrollView>
     </SafeAreaView>
