@@ -33,8 +33,9 @@ const SymptomCard = ({ color, type, date }) => {
 
   const fetchSymptom = async (symptomDate) => {
     const key = `${symptomDate}_${type.toLowerCase()}`;
+    const docRef = doc(db, "symptoms", key);
+
     try {
-      const docRef = doc(db, "symptoms", key);
       const docSnapshot = await getDoc(docRef);
       if (docSnapshot.exists()) {
         const data = docSnapshot.data();
@@ -50,7 +51,6 @@ const SymptomCard = ({ color, type, date }) => {
       console.error("Error fetching symptoms: ", error);
     }
   };
-
 
   useEffect(() => {
     fetchSymptom(date);
