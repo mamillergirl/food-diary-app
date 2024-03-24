@@ -147,6 +147,10 @@ export default function ChartComponent() {
           }}
           width={Dimensions.get("window").width}
           height={220}
+          onDataPointClick={({ value, index }) => {
+            const clickedDate = averageGraphData[index].date;
+            console.log('Clicked Date:', clickedDate);
+          }}
           chartConfig={{
             backgroundColor: "#6DA0D1",
             backgroundGradientFrom: "#82B366",

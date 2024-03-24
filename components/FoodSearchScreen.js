@@ -22,7 +22,7 @@ import _ from "lodash";
 
 const FoodSearchScreen = ({ route }) => {
   const navigation = useNavigation();
-  const { meal, currentDate,path} = route.params;
+  const { meal, currentDate, path } = route.params;
   const [searchQuery, setSearchQuery] = useState("");
   const [searchResults, setSearchResults] = useState([]);
   const [filteredResults, setFilteredResults] = useState([]);
@@ -43,10 +43,7 @@ const FoodSearchScreen = ({ route }) => {
     "EGG_FREE",
     "FISH_FREE",
     "GLUTEN_FREE",
-    "KETO_FRIENDLY",
-    "LOW_FAT_ABS",
     "LOW_SUGAR",
-    "PALEO",
     "PEANUT_FREE",
     "PORK_FREE",
     "RED_MEAT_FREE",
@@ -58,8 +55,6 @@ const FoodSearchScreen = ({ route }) => {
     "VEGETARIAN",
     "WHEAT_FREE",
   ];
-
-
 
   const capitalizeWords = (str) => {
     return str.toLowerCase().replace(/\b\w/g, (char) => char.toUpperCase());
@@ -73,22 +68,19 @@ const FoodSearchScreen = ({ route }) => {
         axios
           .get(apiUrl)
           .then((response) => {
-            
             setSearchResults(response.data.hints);
             // response.data.hints.forEach(element => {
             //   if(findHealthLabels(element)){
             //     filtered.push(element);
             //   }
-              
+
             // });
             setFilteredResults(response.data.hints);
           })
-          
+
           .catch((error) => {
             console.error("Error fetching data:", error);
           });
-
-         
       } else {
         setSearchResults([]);
       }
@@ -96,34 +88,31 @@ const FoodSearchScreen = ({ route }) => {
     []
   );
 
-  const findHealthLabels = async(food) => {
+  const findHealthLabels = async (food) => {
     let requestBody = {
       ingredients: [
         {
           quantity: 1,
           measureURI: food.measures[0].uri,
-          foodId: food.food.foodId
-        }
+          foodId: food.food.foodId,
+        },
       ],
     };
-    
+
     const response = await axios.post(
       `https://api.edamam.com/api/food-database/v2/nutrients?app_id=${appId}&app_key=${appKey}`,
       requestBody
     );
-    
+
     if (response.data.healthLabels.length > 0) {
       return true;
-    } 
-  }
+    }
+  };
 
   useEffect(() => {
-
     delayedQuery(searchQuery);
-   
-    return delayedQuery.cancel;
 
-    
+    return delayedQuery.cancel;
   }, [searchQuery, delayedQuery, currentDate]);
 
   const handleFoodItemClick = (food) => {
@@ -146,18 +135,16 @@ const FoodSearchScreen = ({ route }) => {
       ],
     };
 
-
     try {
       const response = await axios.post(
         `https://api.edamam.com/api/food-database/v2/nutrients?app_id=${appId}&app_key=${appKey}`,
         requestBody
       );
-      
-     
+
       let missingLabels = desiredHealthLabels.filter(
         (label) => !response.data.healthLabels.includes(label)
       );
-      
+
       let healthLabels;
       if (response.data.healthLabels.length > 0) {
         healthLabels = response.data.healthLabels;
@@ -175,9 +162,9 @@ const FoodSearchScreen = ({ route }) => {
       const collectionDocRef = doc(parentCollectionRef, currentDate);
 
       const mealCollectionRef = collection(
-        collectionDocRef, `${currentDate}_${meal.toLowerCase()}`);
-    
-      
+        collectionDocRef,
+        `${currentDate}_${meal.toLowerCase()}`
+      );
 
       const docRef = await addDoc(mealCollectionRef, {
         name: selectedFood.food.knownAs,
@@ -190,11 +177,7 @@ const FoodSearchScreen = ({ route }) => {
         date: currentDate,
         calories: response.data.calories,
         totalNutrients: response.data.totalNutrients,
-      })
-
-      
-  
-      
+      });
     } catch (error) {
       console.error("Error making request:", error);
     }
@@ -213,7 +196,10 @@ const FoodSearchScreen = ({ route }) => {
         <TextInput
           style={styles.textInput}
           placeholder="Search for food..."
-          onChangeText={(text) => {setSearchQuery(text); setFilteredResults([])}}
+          onChangeText={(text) => {
+            setSearchQuery(text);
+            setFilteredResults([]);
+          }}
           value={searchQuery}
         />
       </View>

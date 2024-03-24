@@ -63,10 +63,8 @@ const SymptomCard = ({ color, type, date }) => {
           day: Timestamp.fromDate(new Date()),
           type: type.toLowerCase(),
         }, { merge: true });
-        console.log("Document added successfully.");
-      } else {
-        console.log("Document already exists.");
-      }
+
+      } 
     } catch (error) {
       console.error("Error updating/adding document: ", error);
     }
