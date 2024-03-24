@@ -51,11 +51,35 @@ const SymptomCard = ({ color, type, date }) => {
       console.error("Error fetching symptoms: ", error);
     }
   };
+  const addInitial = async (symptomDate) => {
+    const key = `${symptomDate}_${type.toLowerCase()}`;
+    const docRef = doc(db, 'symptoms', key);
+    
+    try {
+      const docSnapshot = await getDoc(docRef);
+      if (!docSnapshot.exists()) {
+        await setDoc(docRef, {
+          level: 0,
+          day: Timestamp.fromDate(new Date()),
+          type: type.toLowerCase(),
+        }, { merge: true });
+        console.log("Document added successfully.");
+      } else {
+        console.log("Document already exists.");
+      }
+    } catch (error) {
+      console.error("Error updating/adding document: ", error);
+    }
+  };
+  
 
   useEffect(() => {
     fetchSymptom(date);
   }, [date]);
 
+  useEffect(() => {
+    addInitial(date);
+  }, []);
   return (
     <>
       <View style={[styles.container]}>
@@ -100,7 +124,6 @@ const styles = StyleSheet.create({
     overflow: "hidden",
   },
   heading: {
-    fontFamily: "Inter_400Regular",
     fontSize: 18,
     fontWeight: "bold",
     padding: "5%",

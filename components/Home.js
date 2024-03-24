@@ -4,9 +4,35 @@ import { SafeAreaView, View,  Text, ScrollView, Image, StyleSheet } from 'react-
 import Header from './Header';
 import MealInput from './MealInput';
 import SymptomInput from './SymptomInput';
+import { auth, db } from '../firebase';
+import { doc, getDoc, collection, deleteDoc } from "firebase/firestore";
+
 
 export default function Home (){
   const [currentDate, setCurrentDate] = useState(getFormattedDate());
+  const [firstName, setFirstName] = useState("");
+  
+  useEffect(() => {
+    const fetchUserData = async () => {
+      if (auth.currentUser) {
+        try {
+          const docRef = doc(db, "users", auth.currentUser.uid);
+          const docSnapshot = await getDoc(docRef);
+          if (docSnapshot.exists) {
+            const data = docSnapshot.data();
+            setFirstName(data.firstName);
+
+          } else {
+            console.log("No such document!");
+          }
+        } catch (error) {
+          console.error("Error fetching user data:", error);
+        }
+      }
+    };
+
+    fetchUserData();
+  }, []);
 
   function getFormattedDate() {
     const today = new Date();
@@ -24,11 +50,12 @@ export default function Home (){
 
     return `${year}-${month}-${day}`;
   }
+
   return (
     <SafeAreaView style={styles.container}>
       
         <View style={styles.subcontainer}>
-          <Header headingText="Hello, Marisa!" />
+          <Header headingText={`Hello, ${firstName}!`} />
           
         </View>
 
@@ -51,7 +78,6 @@ const styles = StyleSheet.create({
     backgroundColor: '#F2F4F7',
   },
   subheading: {
-    fontFamily: 'Inter',
     fontSize: 20,
     paddingLeft: '7%',
     fontWeight: '400'

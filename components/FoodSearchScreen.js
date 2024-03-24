@@ -187,14 +187,18 @@ const FoodSearchScreen = ({ route }) => {
         healthLabels: healthLabels,
         missingLabels: missingLabels,
         cautions: cautions,
-      }).then(() => {
-        navigation.navigate(path);
+        date: currentDate,
+        calories: response.data.calories,
+        totalNutrients: response.data.totalNutrients,
       })
+
+      
   
       
     } catch (error) {
       console.error("Error making request:", error);
     }
+    navigation.navigate("HomeScreen");
   };
 
   return (

@@ -10,6 +10,8 @@ import AddItem from './AddItem';
 const Card = ({ color, type, category, navigation, date, path}) => { 
   const [isOpen, setIsOpen] = useState(false);
   const [foods, setFoods] = useState([]);
+  const [selectedFood, setSelectedFood] = useState(null);
+  
 
   const getFoods = async (mealCollectionRef) => {
     const querySnapshot = await getDocs(mealCollectionRef);
@@ -62,12 +64,43 @@ const Card = ({ color, type, category, navigation, date, path}) => {
       </TouchableOpacity>
       {isOpen ? <AddItem path={path} date={date} content="Add Food" type={type} /> : <></>}
       {isOpen && foods.map((food) => (
-        <View style={styles.foodContainer} key={food.id}>
+        <>
+        <TouchableOpacity onPress={() => {
+    if (selectedFood && selectedFood.id === food.id) {
+      setSelectedFood(null);
+    } else {
+      setSelectedFood(food);
+    }
+  }} style={styles.foodContainer} key={food.id}>
           <Text style={styles.food}>
             {food.name.toLowerCase().replace(/\b\w/g, (char) => char.toUpperCase())}
           </Text>
           <Button title="Delete" onPress={() => deleteFood(food.id)} />
-        </View>
+        </TouchableOpacity>
+        {selectedFood && selectedFood.id === food.id ? (
+          <View style={styles.selectedFoodContainer}>
+            <View>
+          <Text style={styles.foodExtra}>{selectedFood.servingSize} {selectedFood.servingMeasurement.split("_")[1]}</Text>
+          <Text style={styles.foodExtra}>{selectedFood.calories} Calories</Text>
+          </View> 
+          {
+            selectedFood.totalNutrients ? (
+              <View>
+              <Text style={styles.foodExtra}>{parseFloat(selectedFood.totalNutrients?.CHOCDF.quantity).toFixed(1)} Grams Carb</Text>
+              <Text style={styles.foodExtra}>{parseFloat(selectedFood.totalNutrients?.FIBTG.quantity).toFixed(1)} Grams Fiber</Text> 
+              <Text style={styles.foodExtra}>{parseFloat(selectedFood.totalNutrients?.FAT.quantity).toFixed(1)} Grams Fat</Text>
+              <Text style={styles.foodExtra}>{parseFloat(selectedFood.totalNutrients?.PROCNT.quantity).toFixed(1)} Grams Protein</Text>
+              </View>
+            ) : (
+              <></>
+            )
+          }
+  
+          </View>
+        )  : (
+      <></>
+    )}
+        </>
       ))}
     </>
   );
@@ -85,6 +118,23 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
     marginBottom: '5%'
   },
+  selectedFoodContainer: {
+    backgroundColor: 'white',
+    width: '90%',
+    borderRadius: 20,
+    overflow: 'hidden',
+    marginTop: '-4%',
+    padding: '5%',
+    marginBottom: '5%',
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+
+  },
+  foodExtra: {
+    fontSize: 17,
+    marginBottom: '5%',
+    maxWidth: '100%',
+  },
   subcontainer: {
     flexDirection: 'row',
     height: 100,
@@ -94,7 +144,6 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
   },
   heading: {
-    fontFamily: 'Inter_400Regular',
     fontSize: 18,
     fontWeight: 'bold',
     padding: '5%',

@@ -40,7 +40,7 @@ const SignUp = ({screenChange}) => {
             navigation.navigate('Tabs');
         } catch (error) {
             console.error('Error signing up:', error.message);
-            setError(error.message);
+
         }
     };
 

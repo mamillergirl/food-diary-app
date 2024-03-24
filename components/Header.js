@@ -27,7 +27,6 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
   },
   heading: {
-    fontFamily: 'Inter', 
     fontSize: 24, // Adjust the font size as needed
     fontWeight: '700', // Ensure it's bold
     padding: '5%'

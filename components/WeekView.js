@@ -69,7 +69,6 @@ const styles = StyleSheet.create({
     minWidth: 50,
   },
   subheading: {
-    fontFamily: 'Inter',
     fontSize: 20,
     paddingLeft: '7%',
     fontWeight: '500'
