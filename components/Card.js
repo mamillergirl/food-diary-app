@@ -38,10 +38,12 @@ const Card = ({ color, type, category, navigation, date, path}) => {
   // Fetch data whenever the screen is focused
   useFocusEffect(
     React.useCallback(() => {
+      
       const parentCollectionRef = collection(db, "savedFoods");
       const collectionDocRef = doc(parentCollectionRef, date);
       const mealCollectionRef = collection(collectionDocRef, `${date}_${type.toLowerCase()}`);
       getFoods(mealCollectionRef);
+      setIsOpen(false);
     }, [])
   );
 
@@ -63,7 +65,7 @@ const Card = ({ color, type, category, navigation, date, path}) => {
         />
       </TouchableOpacity>
       {isOpen ? <AddItem path={path} date={date} content="Add Food" type={type} /> : <></>}
-      {isOpen && foods.map((food) => (
+      {isOpen && foods.map((food, index) => (
         <>
         <TouchableOpacity onPress={() => {
     if (selectedFood && selectedFood.id === food.id) {
@@ -71,7 +73,7 @@ const Card = ({ color, type, category, navigation, date, path}) => {
     } else {
       setSelectedFood(food);
     }
-  }} style={styles.foodContainer} key={food.id}>
+  }} style={styles.foodContainer} key={index}>
           <Text style={styles.food}>
             {food.name.toLowerCase().replace(/\b\w/g, (char) => char.toUpperCase())}
           </Text>

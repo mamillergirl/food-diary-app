@@ -7,8 +7,6 @@ import HomeNav from "./HomeNav";
 import Insights from "./Insights";
 import Profile from "./Profile";
 import WeekView from "./WeekView";
-import FetchHighDays from "./FetchHighDays";
-
 const Tab = createBottomTabNavigator();
 
 const Tabs = () => {
@@ -48,16 +46,6 @@ const Tabs = () => {
       <Tab.Screen
         name="Insights"
         component={Insights}
-        options={{
-          tabBarIcon: ({ color, size }) => (
-            <Ionicons name="stats-chart-outline" color={color} size={size} />
-          ),
-          headerShown: false,
-        }}
-      />
-      <Tab.Screen
-        name="Fetch High Days"
-        component={FetchHighDays}
         options={{
           tabBarIcon: ({ color, size }) => (
             <Ionicons name="stats-chart-outline" color={color} size={size} />

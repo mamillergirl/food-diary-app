@@ -125,6 +125,8 @@ const FoodSearchScreen = ({ route }) => {
   const saveSelectedFood = async () => {
     setShowModal(false);
 
+ 
+
     const requestBody = {
       ingredients: [
         {
@@ -134,23 +136,26 @@ const FoodSearchScreen = ({ route }) => {
         },
       ],
     };
-
+   
     try {
       const response = await axios.post(
         `https://api.edamam.com/api/food-database/v2/nutrients?app_id=${appId}&app_key=${appKey}`,
         requestBody
       );
-
-      let missingLabels = desiredHealthLabels.filter(
-        (label) => !response.data.healthLabels.includes(label)
-      );
-
+    
       let healthLabels;
       if (response.data.healthLabels.length > 0) {
         healthLabels = response.data.healthLabels;
       } else {
         healthLabels = [];
       }
+     
+
+      let missingLabels = desiredHealthLabels.filter(
+        (label) => !response.data.healthLabels.includes(label)
+      );
+
+
       let cautions;
       if (response.data.cautions.length > 0) {
         cautions = response.data.cautions;
@@ -238,20 +243,21 @@ const FoodSearchScreen = ({ route }) => {
 
                   <View style={styles.inputContainer}>
                     <View style={styles.pickerContainer}>
-                      <Picker
-                        selectedValue={servingSize}
-                        onValueChange={(itemValue, itemIndex) =>
-                          setServingSize(itemValue)
-                        }
-                      >
-                        {[...Array(25).keys()].map((number) => (
+                    {
+                        <Picker
+                          selectedValue={servingSize}
+                          onValueChange={(itemValue, itemIndex) =>
+                            setServingSize(itemValue)
+                          }
+                        >
                           <Picker.Item
-                            key={number}
-                            label={`${number + 1}`}
-                            value={`${number + 1}`}
+                            label="1"
+                            value="http://www.edamam.com/ontologies/edamam.owl#Measure_serving"
                           />
-                        ))}
-                      </Picker>
+                        </Picker>
+                     
+                    }
+
                     </View>
                     <View style={styles.pickerContainer}>
                       <Picker
